@@ -1,9 +1,9 @@
-1. Python_X_Precurse
-    - Classes
-2. Exercises_1-8_v6
-3. https://www.practicepython.org/
-4. Dictionary_Exercise-9
-5. Flota
+1. Python_V_Precurse
+    - [:x]
+    - for range/enumerate
+    - while
+2. Exercises_1-8
+3. py_complementary/
 
 ---------
 
