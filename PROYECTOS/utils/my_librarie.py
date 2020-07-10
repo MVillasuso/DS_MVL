@@ -14,6 +14,21 @@ def prueba(a):
 test1 = prueba ("Hola")
 print (test1)
 
+
+The following table summarizes some other built-in Pandas aggregations:
+
+Aggregation	Description
+count()	Total number of items
+first(), last()	First and last item
+mean(), median()	Mean and median
+min(), max()	Minimum and maximum
+std(), var()	Standard deviation and variance
+mad()	Mean absolute deviation
+prod()	Product of all items
+sum()	Sum of all items
+These are all methods of DataFrame and Series objects.
+
+
 # FUNCIONES PARA MANIPULAR Y LIMPIAR DATA
 
 import re
