@@ -70,5 +70,25 @@ dollarizer = lambda x: float(x[1:])
 #Test
 #result = dollarizer("$4.32") 
 #print("Resultado:",  result, "Tipo ", type(result))
-
+#
 # _____________________________________________________________________________________
+
+#FECHAS
+# Decada
+""" Función decada
+    Obtiene la década a la que pertenece una determinada edad
+    Argumentos: 
+        s: La edad
+    Nota:  Se puede aplicar a toda  una columna de un dataframe para convertirla así df.col = df.col.apply(decada)
+"""
+decada = lambda age: 10 * (age // 10)
+#df['age_dec'] = df.age.map(decada)
+
+#UltimoDiaLab
+""" Ultimo día laborable del mes (Last Business Day)
+    Obtiene la fecha que corresponde al último día laborable de un mes determinado
+    Argumentos: 
+        s: La fecha de entrada
+    Nota:  Se puede aplicar a toda  una columna de un dataframe para asignarle así df.newcol = dfDate + pd.offsets.BMonthEnd(1)
+"""
+#df["LBD"] = df.Date + pd.offsets.BMonthEnd(1)
