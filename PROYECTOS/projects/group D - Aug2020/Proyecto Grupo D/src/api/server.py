@@ -12,7 +12,8 @@ app = Flask(__name__)  # init
 
 @app.route("/")  # Default path
 def default():
-    return " Hola "
+    mensaje = " <h1> API Grupo D  (GET) </h1> <p> Para obtener TOKEN    /get/token?id=</p>    Para obtener DF     /get/df/?tok= "
+    return mensaje
 
 # ----------------------
 # $$$$$$$ FLASK GET $$$$$$$$
@@ -27,7 +28,7 @@ def token():
         result = "D" + str(dnis)
         return {'token': result}
     else:
-        return "Error: Invalid group" + "<br>" + "<br>" + str(request.args)
+        return "Error: Invalid group. El id debe ser D128" + "<br>" + "<br>" + str(request.args)
 
 # A route to return all of the available entries in our catalog.
 @app.route('/get/df', methods=['GET'])
