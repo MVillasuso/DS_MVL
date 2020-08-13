@@ -30,7 +30,6 @@ def token():
     else:
         return "Error: Invalid group. El id debe ser D128" + "<br>" + "<br>" + str(request.args)
 
-# A route to return all of the available entries in our catalog.
 @app.route('/get/df', methods=['GET'])
 def api_df():
     token_id = None
