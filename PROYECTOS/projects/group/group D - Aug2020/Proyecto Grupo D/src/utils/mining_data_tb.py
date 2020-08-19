@@ -29,9 +29,14 @@ def crear_rank(df):
 
 def crear_df_grupo (df, paises):
     
-    """ Crea el DF con los datos de los países indicados en la lista """
-
+    """ Crea el DF con los datos de los países indicados en la lista 
+        Si hay algun país que no ha reportado casos para la última fecha elimina los registros del último día para todos los 
+        países (de manera que los datos sean consistentes para el análisis)
+    """
+    
     df = df[df.iso_code.isin(paises)]
+    if len (df[df["date"] == df["date"].max()].index)< len (paises):
+        df.drop(df[df["date"] == df["date"].max()].index, axis =0, inplace = True)
     return df
 
 def limpiar_grupo(df, col):

@@ -377,10 +377,14 @@ def graf_corr (df, col, t):
     sns.heatmap(corr, mask=np.zeros_like(corr, dtype=np.bool),  cmap= col, square=True,  annot=True)
     if t =="W":
         plt.title ("COVID19 World - Heatmap")
-        file_name = "gD_heatmap" +  ".png"
+        file_name = t+"_heatmap" +  ".png"
+        ftb.salvar_plot ( "../resources/plots/TOT_W/", file_name)
+    elif t=="gD":
+        plt.title ("COVID19 Group D - Heatmap")
+        file_name = t + "_heatmap" +  ".png"
         ftb.salvar_plot ( "../resources/plots/TOT_D/", file_name)
     else:
-        plt.title ("COVID19 Group D - Heatmap")
-        file_name = "W_heatmap" +  ".png"
-        ftb.salvar_plot ( "../resources/plots/TOT_W/", file_name)
+        plt.title (t+" COVID19 - Heatmap")
+        file_name = t+"_heatmap" +  ".png"
+        ftb.salvar_plot ( "../resources/plots/" + t + "/", file_name)
     plt.show()
