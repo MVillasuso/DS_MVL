@@ -94,7 +94,7 @@ def experience (df):
     """
     Calcula la experiencia segun algunos valores indicados en JobTitle
     """
-    df["exp"]= np.where(df.jobTitle.str.contains('Senior|Sr.|Director'), "Senior","")
+    df["exp"]= np.where(df.jobTitle.str.contains('Senior|Sr.|Director'), "Senior","N/A")
     df["exp"]= np.where((df.jobTitle.str.contains('Junior|Jr.')), "Junior", df.exp)
     df["exp"]= np.where((df.jobTitle.str.contains('Internship|Apprentice|Summer|Intern,')), "Internship", df.exp)
     return df
@@ -103,7 +103,7 @@ def level(df):
     """
     Calcula el nivel de responsabilidad segun algunos valores indicados en JobTitle
     """
-    df["level"]= np.where((df.jobTitle.str.contains('Assistant')), "Assistant", "")
+    df["level"]= np.where((df.jobTitle.str.contains('Assistant')), "Assistant", "N/A")
     df["level"]= np.where((df.jobTitle.str.contains('Analyst')), "Analyst", df.level)
     df["level"]= np.where((df.jobTitle.str.contains('Management|Mgmt|Controller|Lead|Coord|Project')), "PMO", df.level)
     df["level"]= np.where((df.jobTitle.str.contains('Technical|Engineer|Ingénieur')), "Technical", df.level)
@@ -121,9 +121,31 @@ def jobType (df):
     """
     Calcula el tipo de perfil demandado relacionado con Data Science  segun lo especificado en JobTitle
     """
-    df["jobType"]= np.where(df.jobTitle.str.contains('Learning|Ai |Deep|Ml |Artific'), "ML ","")
-    df["jobType"]= np.where((df.jobTitle.str.contains('Data') & df.jobTitle.str.contains('Analyst|Analist') ), "DA", df.jobType)
-    df["jobType"]= np.where((df.jobTitle.str.contains('Business|Intelligence|Bi ') & df.jobTitle.str.contains('Analyst') ), "BA", df.jobType)
-    df["jobType"]= np.where((df.jobTitle.str.contains('Data Scien')), "DS", df.jobType)
-    df["jobType"]= np.where((df.jobTitle.str.contains('Data Engineer|Big Data')), "DE", df.jobType)
+    df["jobType"]= np.where(df.jobTitle.str.contains('Learning|Ai |Deep|Ml |Artific'), "ML/AI","")
+    df["jobType"]= np.where((df.jobTitle.str.contains('Data') & df.jobTitle.str.contains('Analyst|Analist') ), "Data Analyst", df.jobType)
+    df["jobType"]= np.where((df.jobTitle.str.contains('Business|Intelligence|Bi ') & df.jobTitle.str.contains('Analyst') ), "Business Analyst", df.jobType)
+    df["jobType"]= np.where((df.jobTitle.str.contains('Data Scien')), "Data Scientist", df.jobType)
+    df["jobType"]= np.where((df.jobTitle.str.contains('Data Engineer|Big Data')), "Data Engineer", df.jobType)
+    df["jobType"]= np.where((df.jobTitle.str.contains('Project Manager')), "Project Manager", df.jobType)
     return df
+
+
+def llenar_na(df):
+    # Llenar con el valor "N/A" (Not Available) los casos en que el valor este vacio --> nulo
+    df["sector"].fillna("N/A", inplace=True)
+    df["industry"].fillna("N/A", inplace=True)
+    df["empSize"].fillna("N/A", inplace=True)
+    df["size"].fillna("N/A", inplace=True)
+    df["type"].fillna("N/A", inplace=True)
+    df["revenue"].fillna("Unknown / Non-Applicable", inplace=True)
+    # Eliminación de filas con nombre de empresa null (mas o menos 3500) o JobDesc null (4 registros). 
+    # Se eliminan pues no aportan informacion
+    df.drop(df[df["empName"].isnull()].index, axis = 0, inplace=True)
+    df.drop(df[df["jobDesc"].isnull()].index, axis = 0, inplace=True)
+    return df
+
+def resumen_df (df):
+    res_df = df.groupby(["empSize", "sector", "industry", "type","ccode", "cname", "exp", "level","jobType"]).agg({'jobTitle':['size'],'salLow':['min','max','mean'], 'salHigh':['min','max','mean']})
+    res_df.reset_index(inplace=True)
+    res_df.columns = ['size','sector','industry','type','ccode','cname','exp','level','jobType','total','salLow_min','salLow_max', 'salLow_mean','salHigh_min', 'salHigh_max', 'salHigh_mean']
+    return res_df

@@ -88,6 +88,12 @@ def grafI_pais (ccode,col_dat, cname,cdf, y_maximo,adf):
         filen= "Rank_"
 
     fig = px.line(cdf, x="date", y=col_dat, line_shape="spline", render_mode="svg")
+
+    fig.add_annotation(x=adf.alarm_init[adf.iso_code==ccode].fillna("01-03-2020").values[0], y=eje_y, text="start alarm")
+       
+    fig.add_annotation(x=adf.alarm_end[adf.iso_code==ccode].fillna("31-12-2020").values[0], y=eje_y, text="end alarm")
+    fig.update_annotations(dict(xref="x", yref="y", showarrow=True, arrowhead=7, ax=-20, ay=20))
+
     fig.update_layout(     
             title = {"text" : tit, "x":0.4, "xanchor":"center"}, 
             xaxis_title = "Date",
@@ -128,6 +134,11 @@ def graf_daily(n1,c1,n2,c2,ccode,df, cname,adf):
     fig = go.Figure(data=[
         go.Bar(name= n1, x=df['date'], y=df[c1]),
         go.Bar(name= n2, x=df['date'], y=df[c2])])
+
+    fig.add_annotation(x=adf.alarm_init[adf.iso_code==ccode].fillna("01-03-2020").values[0], y=df[c1].max(), text="start alarm")
+       
+    fig.add_annotation(x=adf.alarm_end[adf.iso_code==ccode].fillna("31-12-2020").values[0], y=df[c1].max(), text="end alarm")
+    fig.update_annotations(dict(xref="x", yref="y", showarrow=True, arrowhead=7, ax=-20, ay=20))    
     fig.update_layout(
                     barmode='overlay', 
                     title={ "text":"Covid19  Daily Cases and Daily Deaths - " + cname.title(), "x":0.42, "xanchor": "center"},
@@ -224,7 +235,7 @@ def grafI_bar(df,xval,yval,col,mod, tit):
     """ Gráfico interactivo tipo barra con los países del grupo D 
         Guarda el gráfico (.html) en el directorio TOT_D """
 
-    fig = px.bar(df,x = xval,y = yval , color= col, barmode= mod)
+    fig = px.bar(df,x = xval,y = yval , color= col, barmode= mod,color_discrete_sequence=["red","purple","blue","green","orange"])
     fig.update_layout(
         title = {"text" : tit, "x":0.5, "xanchor": "center"},
         xaxis_title=  xval.title(),
@@ -302,10 +313,10 @@ def graf_rank_D(datf):
 
     df = datf[datf.date==datf.date.max()]
     fig = go.Figure(data=[
-        go.Bar(name='Position - Total Cases', x=df['location'], y=df['rank_TC']),
-        go.Bar(name='Position - Total Deaths', x=df['location'], y=df['rank_TD']),
-        go.Bar(name='Position - Total Cases x million', x=df['location'], y=df['rank_TCxM']),
-        go.Bar(name='Position - Total Deaths x million', x=df['location'], y=df['rank_TDxM'])
+        go.Bar(name='Total Cases', x=df['location'], y=df['rank_TC']),
+        go.Bar(name='Total Deaths', x=df['location'], y=df['rank_TD']),
+        go.Bar(name='Total Cases x million', x=df['location'], y=df['rank_TCxM']),
+        go.Bar(name='Total Deaths x million', x=df['location'], y=df['rank_TDxM'])
         ])
     fig.update_layout(barmode='group', title='Group D Position World Ranking  - Covid19')
     file_name = "rank_gD_bar"
@@ -318,9 +329,9 @@ def graf_outlD(datf, col):
     """ Gráfico de outliers 
         Guarda el gráfico (.png) en el directorio TOT_D """
 
-    sns.set(style="ticks", palette="bright")
+    sns.set(style="ticks", palette="vlag")
     sns.boxplot(x="location", y=col,
-                palette=["m", "g", "b", "r", "y"],
+                palette=["b", "r","g","m","orange"],
                 data=datf)
     file_name = col+ "_gD_box"
     ftb.salvar_plot("../resources/plots/TOT_D/", file_name)

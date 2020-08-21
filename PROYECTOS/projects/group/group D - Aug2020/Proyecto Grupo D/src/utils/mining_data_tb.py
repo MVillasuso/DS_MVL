@@ -8,6 +8,8 @@ def world(df):
     
     df = df[~((df.continent.isnull()) | (df.iso_code.isnull()))]
     df["date"]=pd.to_datetime(df["date"],format="%Y-%m-%d")
+    if len (df[df["date"] == df["date"].max()].index)< len (df.groupby('iso_code')['date'].max()):
+        df.drop(df[df["date"] == df["date"].max()].index, axis =0, inplace = True)
     return df
  
  
