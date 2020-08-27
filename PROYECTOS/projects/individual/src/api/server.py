@@ -1,7 +1,7 @@
 import os, sys
 from flask import Flask, render_template, redirect, request, jsonify 
 import json
-import mean_group_d as mg
+# import mean_group_d as mg
 
 
 # ----------------------
@@ -12,36 +12,29 @@ app = Flask(__name__)  # init
 
 @app.route("/")  # Default path
 def default():
-    mensaje = " <h1> API Grupo D  (GET) </h1> <p> Para obtener TOKEN    /get/token?id=</p>    Para obtener DF     /get/df/?tok= "
+    mensaje = " <h1> DataScience Jobs API  (GET) </h1> <p> Datos resumidos sobre la oferta laboral en Datascience según www.glassdoor.com <h3>     /get/df?tok=</p></h3>"
+    mensaje +=  "<br>" + " <h6> Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678) </h6>"
     return mensaje
 
 # ----------------------
 # $$$$$$$ FLASK GET $$$$$$$$
 # ----------------------
 
-@app.route('/get/token', methods=['GET'])
-def token():
-    if 'id' in request.args:
-        group = str(request.args['id'])
-    if group == "D128": 
-        dnis = (55114370 * 3406313 * 51928335)
-        result = "D" + str(dnis)
-        return {'token': result}
-    else:
-        return "Error: Invalid group. El id debe ser D128" + "<br>" + "<br>" + str(request.args)
-
 @app.route('/get/df', methods=['GET'])
 def api_df():
+    """"
+    Recibe como argumento un token. Si es válido (según las especificaciones), retorna un archivo resumido y depurado con los datos de oferta laboral en 
+    DataScience según  GlassDoor.com
+    """
     token_id = None
     if 'tok' in request.args:
         token_id = str(request.args['tok'])
-    if token_id == 'D9748859183511168646350':           #Si el token es válido
-        url = "https://covid.ourworldindata.org/data/owid-covid-data.csv"       #obtener los datos actualizados
-        country_l =["PRT", "VEN", "TUR", "GBR", "ESP"]  # lista de paises grupo D
-        resp =  mg.t_d_mean (url, country_l)            # Obtener la media diaria de total_deaths para esos países
-        return resp
+    if token_id == 'E55114370':           #Si el token es válido
+        #resp =  mg.t_d_mean (url, country_l)            # Obtener la media diaria de total_deaths para esos países
+        #return resp
+        return  "Resumen glassdoor - Oferta de trabajo en DataScience" 
     else:
-        return "Error: Invalid Token" + "<br>" + "<br>" + str(request.args)
+        return "Error: Token inválido" + "<br>" + "<br>" + str(request.args)
 
 # ----------------------
 # $$$$$$$ MAIN $$$$$$$$

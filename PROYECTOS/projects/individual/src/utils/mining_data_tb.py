@@ -21,6 +21,8 @@ def elim_cols(df):
     'overview.foundedYear': 'foundedYear','overview.industry':'industry', 'overview.revenue': "revenue",
     'overview.sector':'sector', 'overview.size': 'size', 'overview.type':'type'})
 
+    newdf.drop_duplicates (inplace = True)
+
     return newdf
 
 def transf_cols(df):
@@ -120,13 +122,15 @@ def level(df):
 def jobType (df):
     """
     Calcula el tipo de perfil demandado relacionado con Data Science  segun lo especificado en JobTitle
+    Crea una columna "sal" para el salario medio de la banda salarial del cargo (la media entre Low y High)
     """
-    df["jobType"]= np.where(df.jobTitle.str.contains('Learning|Ai |Deep|Ml |Artific'), "ML/AI","")
+    df["jobType"]= np.where(df.jobTitle.str.contains('Learning|Ai |Deep|Ml |Artific'), "ML/AI","Other")
     df["jobType"]= np.where((df.jobTitle.str.contains('Data') & df.jobTitle.str.contains('Analyst|Analist') ), "Data Analyst", df.jobType)
     df["jobType"]= np.where((df.jobTitle.str.contains('Business|Intelligence|Bi ') & df.jobTitle.str.contains('Analyst') ), "Business Analyst", df.jobType)
     df["jobType"]= np.where((df.jobTitle.str.contains('Data Scien')), "Data Scientist", df.jobType)
     df["jobType"]= np.where((df.jobTitle.str.contains('Data Engineer|Big Data')), "Data Engineer", df.jobType)
     df["jobType"]= np.where((df.jobTitle.str.contains('Project Manager')), "Project Manager", df.jobType)
+    df["sal"] = np.where(df.salLow > 0, (df['salLow']+ df['salHigh'])/2,0)
     return df
 
 
@@ -135,6 +139,7 @@ def llenar_na(df):
     df["sector"].fillna("N/A", inplace=True)
     df["industry"].fillna("N/A", inplace=True)
     df["empSize"].fillna("N/A", inplace=True)
+    df["empSize"]= np.where((df.empSize=='-1-0'), "N/A", df.empSize)
     df["size"].fillna("N/A", inplace=True)
     df["type"].fillna("N/A", inplace=True)
     df["revenue"].fillna("Unknown / Non-Applicable", inplace=True)
@@ -142,10 +147,33 @@ def llenar_na(df):
     # Se eliminan pues no aportan informacion
     df.drop(df[df["empName"].isnull()].index, axis = 0, inplace=True)
     df.drop(df[df["jobDesc"].isnull()].index, axis = 0, inplace=True)
+    #Asignar orden al tamano de la empresa segun la cantidad de empleados en empSize
+    df["size"]= np.where((df.empSize=="1-50"), 1, df["size"])
+    df["size"]= np.where((df.empSize=="51-200"), 2, df["size"])
+    df["size"]= np.where((df.empSize=="201-500"), 3, df["size"])
+    df["size"]= np.where((df.empSize=="501-1000"), 4, df["size"])
+    df["size"]= np.where((df.empSize=="1001-5000"), 5, df["size"])
+    df["size"]= np.where((df.empSize=="5001-10000"), 6, df["size"])
+    df["size"]= np.where((df.empSize=="10000--1"), 7, df["size"])
+    df["size"]= np.where((df.empSize=="N/A"), 8, df["size"])
+    df["size"] = pd.to_numeric(df["size"], downcast='integer')
     return df
 
 def resumen_df (df):
-    res_df = df.groupby(["empSize", "sector", "industry", "type","ccode", "cname", "exp", "level","jobType"]).agg({'jobTitle':['size'],'salLow':['min','max','mean'], 'salHigh':['min','max','mean']})
+    """"
+    Dataframe resumen con la información agregada y sumarizada para facilitar el análisis
+    """
+    res_df = df.groupby(["size", "empSize", "sector", "industry", "type","ccode", "cname", "exp", "level","jobType"]).agg({'jobTitle':['size'],'salLow':['min','max','mean'], 'salHigh':['min','max','mean'],'sal':['mean']})
     res_df.reset_index(inplace=True)
-    res_df.columns = ['size','sector','industry','type','ccode','cname','exp','level','jobType','total','salLow_min','salLow_max', 'salLow_mean','salHigh_min', 'salHigh_max', 'salHigh_mean']
+    res_df.columns = ['size','empSize','sector','industry','type','ccode','cname','exp','level','jobType','total','salLow_min','salLow_max', 'salLow_mean','salHigh_min', 'salHigh_max', 'salHigh_mean','sal_mean']
+  
     return res_df
+
+def res_emp_df (df):
+    """"
+    Dataframe resumen con la información agregada por EMPRESA y sumarizada para el análisis
+    """
+    emp_df = df.groupby(["size", "empSize", "empName", "sector", "industry", "type","jobType"]).agg({'jobTitle':['size'],'sal':['mean']})
+    emp_df.reset_index(inplace=True)
+    emp_df.columns = ['size','empSize', 'empName','sector','industry','type','jobType','total','sal_mean']
+    return emp_df
