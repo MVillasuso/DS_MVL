@@ -21,7 +21,7 @@ def elim_cols(df):
     'overview.foundedYear': 'foundedYear','overview.industry':'industry', 'overview.revenue': "revenue",
     'overview.sector':'sector', 'overview.size': 'size', 'overview.type':'type'})
 
-    newdf.drop_duplicates (inplace = True)
+    newdf.drop_duplicates (inplace = True)      #Elimina las filas duplicadas (misma oferta que procede de diferentes fuentes)
 
     return newdf
 
@@ -94,7 +94,7 @@ def ubicar_loc (df):
 
 def experience (df):
     """
-    Calcula la experiencia segun algunos valores indicados en JobTitle
+    Determina la experiencia segun algunos valores indicados en JobTitle
     """
     df["exp"]= np.where(df.jobTitle.str.contains('Senior|Sr.|Director'), "Senior","N/A")
     df["exp"]= np.where((df.jobTitle.str.contains('Junior|Jr.')), "Junior", df.exp)
@@ -103,7 +103,7 @@ def experience (df):
 
 def level(df):
     """
-    Calcula el nivel de responsabilidad segun algunos valores indicados en JobTitle
+    Determina el nivel de responsabilidad segun algunos valores indicados en JobTitle
     """
     df["level"]= np.where((df.jobTitle.str.contains('Assistant')), "Assistant", "N/A")
     df["level"]= np.where((df.jobTitle.str.contains('Analyst')), "Analyst", df.level)
@@ -135,6 +135,9 @@ def jobType (df):
 
 
 def llenar_na(df):
+    """
+    Actualización del dataframe con valores útiles para el análisis y gráficos
+    """
     # Llenar con el valor "N/A" (Not Available) los casos en que el valor este vacio --> nulo
     df["sector"].fillna("N/A", inplace=True)
     df["industry"].fillna("N/A", inplace=True)

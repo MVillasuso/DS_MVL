@@ -8,6 +8,134 @@ import plotly.express as px
 import plotly.io as pio
 import folders_tb as ftb
 
+
+def graf_bar (col, col2, df, numbars, val_excl, lcolors,lorden,xtit,ytit,tit,rol, emp):
+    if emp:
+        top_num = df[(df.jobType!="Other")& (df.jobType!="Project Manager")].groupby(col).sum().sort_values("total", ascending = False).total.nlargest(numbars).index.to_list()
+    else:
+        top_num = df[col].value_counts().head(numbars).index.to_list()
+
+    bar_df = df[(df[col]!=val_excl) & (df[col].isin(top_num)) ].groupby([col,col2]).total.sum().to_frame()
+    bar_df.reset_index(inplace=True)
+ 
+    fig=px.bar(bar_df, x=col, y = "total", color = col2, color_discrete_map = lcolors, width=900, height=600)
+    
+    if lorden:
+        xaxisval={'categoryorder':'array', 'categoryarray':lorden} 
+    else:
+        xaxisval={'categoryorder':'total descending'} 
+
+    fig.update_layout(  
+        barmode='stack', xaxis = xaxisval,   
+        title = {"text" : tit, "x":0.4, "xanchor":"center"},             
+        xaxis_title = xtit,
+        yaxis_title = ytit,
+        legend=dict(title= rol, y=0.5, font_size=8))
+    fig.show()
+
+def graf_pie (df, val, col,tit,lcolor):
+    fig = px.pie(df, values=val, names=col, title=tit, color = col, color_discrete_map = lcolor)
+    fig.show()
+
+def graf_sbpie (df,lpath,val,col,lcolor,tit, det):
+    if det : 
+        fig = px.sunburst(df, path=lpath, values=val, color = col, color_discrete_map=lcolor, title=tit)
+    else:
+        fig = px.sunburst(df, path=lpath, color = col, title=tit)
+    fig.show()
+
+def graf_snsscat(xval,yval,hueval,df, sizval,colorval, heival,widval, xlab,ylab,titval):
+    plt.subplots(figsize=(heival, widval))
+    sns.scatterplot(x=xval, y=yval, hue=hueval, alpha=.6, data=df, size = sizval, sizes = (10,200), palette = colorval, legend = "full")
+    plt.ylabel(ylab, fontsize= 15)
+    plt.xlabel(xlab, fontsize= 15)
+    plt.title (titval)
+    plt.show()
+
+def graf_glscat(df,xval,yval,tval,sval,colorval,titval,widval,heival):
+    """"
+    Salario por antigüedad y tamano de la empresa (muestra el nombre de la empresa)
+    """
+    fig = go.Figure(data=go.Scattergl(
+        x = df[xval],
+        y = df[yval],
+        text = df[tval],
+        mode='markers',
+        marker=dict(
+            size = df[sval]*2, 
+            color=df[sval],
+            colorscale='GnBu_r',
+            line_width=1,
+            showscale=True
+        )
+    ))
+    fig.update_layout(
+        title=titval,
+        showlegend =False, 
+        #legend= dict(title= "Nro-Empleados", y=1.1, font_size=10),
+        autosize=False,
+        width=widval,
+        plot_bgcolor = "darkgrey",
+        height=heival)
+
+    fig.show()
+
+
+def graf_hist(df,colval,colorval,titval,xlab, sh=False, binval=0):
+    """
+    Histograma de la columna indicada. Si el parámetro binval es asignado, cambia los valores de los rangos de agrupación
+    """
+    if binval:
+        sns.distplot(df[colval], color = colorval, bins=binval)
+    else:
+         sns.distplot(df[colval], color = colorval)
+    if sh:
+        plt.title(titval, fontsize = 20)
+        plt.xlabel(xlab, fontsize = 15)
+        plt.show()
+
+def graf_gobox(df, colval, ycol, diccol, titval, widval, heival):
+    """
+        Gráfico de caja contrastando por cada valor diferente del argumento colval
+    """
+    x_data =[]
+    y_data=[]
+    lcolors=[]
+
+    for clave, valor in diccol.items(): 
+        x_data.append(clave)
+        y_data.append(df[df[colval]==clave][ycol])
+        lcolors.append (valor)
+    fig = go.Figure()
+    for xd, yd, cls in zip(x_data, y_data, lcolors):
+            fig.add_trace(go.Box(
+                y=yd,
+                name=xd,
+                boxpoints='all',
+                jitter=0.5,
+                whiskerwidth=0.2,
+                fillcolor=cls,
+                marker_size=2,
+                line_width=1)
+            )
+    fig.update_layout(
+        title= titval,
+        showlegend =False, 
+        autosize=False,
+        width=widval,
+        height=heival)
+    fig.show()
+
+def graf_mapam(df,locval,locmodval,colorval, hovval, sval,colorsval,widval, heival,titval, legval):
+    """ Crea un mapa mundial interactivo con la oferta laboral en cada país. Puede filtrarse por tipo de oferta """ 
+    fig = px.scatter_geo(df, locations=locval, locationmode=locmodval ,color=colorval, hover_name=hovval, size=df[sval], projection="natural earth", color_discrete_map = colorsval, width =widval , height = heival, title = titval)
+    fig.update_layout(
+        showlegend =True, 
+        legend= dict(title= legval, y=1.1, font_size=10))
+    fig.show()
+
+
+# --------------------------------------------------------------------------------------------------------------------------
 def graf_grupo (x_val, y_val, hue_val, df, inv_y): 
 
     """ Crea un gráfico ESTÁTICO (de todos los países del grupo) con el valor de una columna de datos en un gráfico de líneas
