@@ -1,8 +1,7 @@
 import os, sys
 from flask import Flask, render_template, redirect, request, jsonify 
 import json
-# import mean_group_d as mg
-
+#import apis_tb as atb
 
 # ----------------------
 # $$$$$$$ FLASK $$$$$$$$
@@ -22,17 +21,22 @@ def default():
 
 @app.route('/get/df', methods=['GET'])
 def api_df():
-    """"
+    """
     Recibe como argumento un token. Si es válido (según las especificaciones), retorna un archivo resumido y depurado con los datos de oferta laboral en 
     DataScience según  GlassDoor.com
+    Busca los datos en el directorio /resources/dataset. EL directorio resources está al mismo nivel que el directorio src
     """
     token_id = None
     if 'tok' in request.args:
         token_id = str(request.args['tok'])
     if token_id == 'E55114370':           #Si el token es válido
-        #resp =  mg.t_d_mean (url, country_l)            # Obtener la media diaria de total_deaths para esos países
-        #return resp
-        return  "Resumen glassdoor - Oferta de trabajo en DataScience" 
+        print(sys.path)
+        pfile = os.path.dirname(__file__) 
+        pfile = pfile[0:pfile.find("src")]
+        #jobfile = pfile + "resources/dataset/glassdoor.csv"
+        #cfile = pfile + "resources/dataset/country_names_2_digit_codes.csv"
+        #resp =  atb.preparar_df(jobfile,cfile)      
+        return print(sys.path) #resp
     else:
         return "Error: Token inválido" + "<br>" + "<br>" + str(request.args)
 
@@ -62,5 +66,23 @@ def main():
     else:
         print("Server settings.json doesn't allow to start server. " + "Please, allow it to run it.")
             
+
+def __get_root_project(number_of_descent): 
+    # For .py files
+    __file = __file__ 
+    # For .ipynb files
+    #__file = os.getcwd()
+    for _ in range(number_of_descent):
+        __file = os.path.dirname(__file)
+        sys.path.append(__file)
+    sys.path.append(__file  + "/resources")  #***********
+    sys.path.append(__file  + "/src/utils") #***********
+    sys.path = list(set(sys.path))
+
 if __name__ == "__main__":
     main()
+
+
+__get_root_project(number_of_descent=3)
+
+print(sys.path)

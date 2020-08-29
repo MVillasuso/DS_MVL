@@ -23,3 +23,16 @@ def salvarI_plot (fig, dir_name, f_name):
     plotly.offline.plot(fig, filename= results_dir + f_name, auto_open = False)
  
 
+def exportar_json (df, npath, fname):
+    results_dir = os.path.join(npath) 
+    if not os.path.isdir(results_dir): 
+        os.makedirs(results_dir) 
+    file_name = npath + fname + ".json"
+    df.to_json(file_name)
+
+def exportar_csv (df, npath, fname):
+    results_dir = os.path.join(npath) 
+    if not os.path.isdir(results_dir): 
+        os.makedirs(results_dir) 
+    file_name = npath + fname + ".csv"
+    df.to_csv(file_name)
