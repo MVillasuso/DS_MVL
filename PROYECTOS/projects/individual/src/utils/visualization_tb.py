@@ -8,7 +8,8 @@ import folders_tb as ftb
 
 def graf_bar (col, col2, df, numbars, val_excl, lcolors,lorden,xtit,ytit,tit,rol, emp, fname):
     """
-    Crea un gráfico de barras interactivo y lo guarda como htnl en el directorio /plots segun el nombre indicado en fname
+    Crea un gráfico de barras interactivo y lo guarda como html en el directorio /plots segun el nombre indicado en fname
+    Selecciona únicamente los registros que representann el top X (siendo X el argumento numbars)
     """
     if emp:
         top_num = df[(df.jobType!="Other")& (df.jobType!="Project Manager")].groupby(col).sum().sort_values("total", ascending = False).total.nlargest(numbars).index.to_list()
@@ -37,7 +38,7 @@ def graf_bar (col, col2, df, numbars, val_excl, lcolors,lorden,xtit,ytit,tit,rol
 
 def graf_pie (df, val, col,tit,lcolor, fname):
     """
-    Crea un gráfico de tarta interactivo y lo guarda como htnl en el directorio /plots segun el nombre indicado en fname
+    Crea un gráfico de tarta interactivo y lo guarda como html en el directorio /plots segun el nombre indicado en fname
     """
     fig = px.pie(df, values=val, names=col, title=tit, color = col, color_discrete_map = lcolor)
     ftb.salvarI_plot(fig,"../resources/plots/", fname)
@@ -45,7 +46,7 @@ def graf_pie (df, val, col,tit,lcolor, fname):
 
 def graf_sbpie (df,lpath,val,col,lcolor,tit, det,fname):
     """
-    Crea un gráfico de tarta tipo SunBurnst y lo guarda como htnl en el directorio /plots segun el nombre indicado en fname
+    Crea un gráfico de tarta tipo SunBurnst y lo guarda como html en el directorio /plots segun el nombre indicado en fname
     """
     if det : 
         fig = px.sunburst(df, path=lpath, values=val, color = col, color_discrete_map=lcolor, title=tit)
@@ -69,7 +70,7 @@ def graf_snsscat(xval,yval,hueval,df, sizval,colorval, heival,widval, xlab,ylab,
 
 def graf_glscat(df,xval,yval,tval,sval,colorval,titval,widval,heival,fname):
     """"
-    Crea un gráfico dinámico de dispersión  y lo guarda como htnl en el directorio /plots segun el nombre indicado en fname
+    Crea un gráfico dinámico de dispersión  y lo guarda como html en el directorio /plots segun el nombre indicado en fname
     """
     fig = go.Figure(data=go.Scattergl(
         x = df[xval],
