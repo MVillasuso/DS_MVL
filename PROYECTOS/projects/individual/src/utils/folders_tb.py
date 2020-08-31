@@ -2,7 +2,6 @@ import os, sys
 import matplotlib.pyplot as plt
 import plotly
 
-
 # Guarda el resultado del gráfico dentro  del directorio indicado (creándolo si no existe)
 def salvar_plot (dir_name, f_name):
 
