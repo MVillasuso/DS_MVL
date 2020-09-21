@@ -1,9 +1,8 @@
 import os, sys
-sys.path.append("../utils")
+sys.path.append("/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/individual/")
 from flask import Flask, render_template, redirect, request, jsonify 
 import json
-import apis_tb
-
+import src.utils.apis_tb as atb
 
 # ----------------------
 # $$$$$$$ FLASK $$$$$$$$
@@ -37,7 +36,7 @@ def api_df():
         pfile = pfile[0:pfile.find("src")]
         jobfile = pfile + "resources/dataset/glassdoor.csv"
         cfile = pfile + "resources/dataset/country_names_2_digit_codes.csv"
-        resp =  apis_tb.preparar_df(jobfile,cfile)      
+        resp =  atb.preparar_df(jobfile,cfile)      
         return resp
     else:
         return "Error: Token inválido" + "<br>" + "<br>" + str(request.args)
