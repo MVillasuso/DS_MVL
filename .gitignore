@@ -19,3 +19,7 @@ Archivo.zip
 *.json
 *.zip
 *.md
+*.jpg
+*.pdf
+*.h5
+modelos/
