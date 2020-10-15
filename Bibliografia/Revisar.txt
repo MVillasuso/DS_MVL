@@ -1,0 +1,17 @@
+https://www.kdnuggets.com/2020/10/guide-authentic-data-science-portfolio-project.html
+https://atozofai.withgoogle.com/intl/en-US/
+
+https://serokell.io/blog/deep-learning-and-neural-network-guide
+
+https://medium.com/@vijayabhaskar96/tutorial-image-classification-with-keras-flow-from-directory-and-generators-95f75ebe5720
+
+https://towardsdatascience.com/deep-neural-networks-for-regression-problems-81321897ca33
+
+https://informationisbeautiful.net
+
+https://www.youtube.com/watch?v=MsL79ZIqWpg
+
+
+Tableau
+https://public.tableau.com/profile/anavh#!/vizhome/120YearsofOlympicGames/OlympicGames
+https://public.tableau.com/profile/anavh#!/vizhome/Covid-1912092020/Covid-19
