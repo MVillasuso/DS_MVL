@@ -1,3 +1,4 @@
+#coding=utf-8
 import os, sys
 sys.path.append("/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/individual/")
 from flask import Flask, render_template, redirect, request, jsonify 
