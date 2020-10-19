@@ -4,9 +4,6 @@ import json
 import time
 from tensorflow.keras.models import model_from_json  # Cargar los modelos guardados
 
-def prueba ():
-    a = "Hola mundo"
-    return a
 
 def guardar_modelo (modelo, ruta, test_acc):
     """

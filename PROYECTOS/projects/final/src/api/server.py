@@ -11,9 +11,10 @@ from flask import render_template, redirect, request, jsonify , send_file
 import imageio
 import cv2
 from PIL import Image
-
+# Módulos del proyecto
 import models_tb as mtb
-import imagenes_tb as itb
+import folders_tb as ftb
+import apis_tb as atb
 
 # ----------------------
 # $$$$$$$ FLASK $$$$$$$$
@@ -25,8 +26,9 @@ app = Flask(__name__)  # init
 def default():
     return """
     <html>
-        <body style="background-color: #aad6ab;" >
-            <h1> Revisión de lesiones cutáneas  (GET) </h1> <p> Modelo para evaluación de lunares o lesiones cutáneas sospechosas <h3> Use     /get/access?tok=</p></h3>
+        <body style="background-color: #accba1;" >
+            <h1> Revisión de lesiones cutáneas  (GET) </h1> 
+            <p> Modelo para evaluación de lunares o lesiones cutáneas sospechosas <h3> Use     /get/access?tok=</p></h3>
              <h6> Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678) </h6>
         </body>
     </html> """
@@ -45,9 +47,10 @@ def acceso():
     if token_id == 'E55114370':           #Si el token es válido
         resp = """
                 <html>
-                    <body style="background-color: #aad6ab;" >
+                    <body style="background-color: #accba1;" >
                         <h2> Nota: Necesitará la foto de su lesión en formato PNG </h2>
-                        <h3> Use -->    get/pred?mod=lunares <h3>    
+                        <h3> Para ver la predicción     use  -->    get/pred?mod=lunares <h3>  
+                        <h3> Para obtener archivo json  use -->    get/pred?mod=json <h3>    
                     </body> 
                 </html>"""
         return resp
@@ -62,13 +65,29 @@ def pred():
     if valid == 'lunares':           #Si el token es válido
         return """
                 <html>
-                    <body style="background-color: #aad6ab;" >
+                    <body style="background-color: #accba1;" >
                         <h2>Evaluación de lesiones cutáneas</h2>
                         <p> Sube una foto de la lesión en formato <b>PNG</b> o <b>JPG</b> y te diremos si debes revisarla con un especialista. </p>
-                        <p> <i> La información obtenida es únicamente orientativa y no pretende reemplazar el diagnóstico o la opinión de un profesional </i> </p>
+                        <p> <i> El resultado es orientativo. No pretende reemplazar el diagnóstico o la opinión de un profesional </i> </p>
                         <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
                         </p>
                         <form action="/predict" method="post" enctype="multipart/form-data">
+                            <input type="file" name="data_file" />
+                            <input type="submit" />
+                        </form>
+                    </body>
+                </html>
+            """
+    elif valid == "json":
+        return """
+                <html>
+                    <body style="background-color: #accba1;" >
+                        <h2>[JSON] Evaluación de lesiones cutáneas</h2>
+                        <p> Sube una foto de la lesión en formato <b>PNG</b> o <b>JPG</b>. </p>
+                        <p> <i> Devuelve un string en formato JSON con la probabilidad del modelo para cada clase </i> </p>
+                        <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
+                        </p>
+                        <form action="/pred_json" method="post" enctype="multipart/form-data">
                             <input type="file" name="data_file" />
                             <input type="submit" />
                         </form>
@@ -87,17 +106,41 @@ def get_pred():
         return "No hay archivo seleccionado"
 
     if ".png"  in str(request_file) :
-        foto=itb.preparar_imagen(request_file,48)
-        foto_r= itb.formatear_imagen(foto,48)
+        foto=ftb.preparar_imagen(request_file,48)
+        foto_r= ftb.formatear_imagen(foto,48)
         class_names = ['Sospechoso','Benigno']
         ubicacion = "/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/final/modelos"
         model_name = "Model_0.82609_16-18-16"
         modelo = mtb.cargar_modelo (ubicacion, model_name)
-        prediccion = itb.prediccion_imagen(modelo, foto_r, class_names, imagen_orig=None)
+        prediccion = atb.prediccion_imagen(modelo, foto_r, class_names, imagen_orig=None)
         respuesta= """
                 <html>
-                    <body style="background-color: #c0deff;" > 
+                    <body style="background-color: #9cab97;" > 
                         <h4>Imagen de caracter </h4>
+                        <p> <h3>"""+ prediccion + """ </h3> <p> 
+                    </body>
+                </html> """
+        return respuesta
+    else :
+        return "Seleccione un formato de archivo válido (.png o .jpg)"
+
+@app.route('/pred_json', methods=["POST"])
+def get_pred_json():
+    request_file = request.files['data_file']
+
+    if not request_file:
+        return "No hay archivo seleccionado"
+    if ".png"  in str(request_file) :
+        foto=ftb.preparar_imagen(request_file,48)
+        foto_r= ftb.formatear_imagen(foto,48)
+        class_names = ['Sospechoso','Benigno']
+        ubicacion = "/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/final/modelos"
+        model_name = "Model_0.82609_16-18-16"
+        modelo = mtb.cargar_modelo (ubicacion, model_name)
+        prediccion = atb.pred_json(modelo,foto_r,class_names)
+        respuesta= """
+                <html>
+                    <body style="background-color: #9cab97;" > 
                         <p> <h3>"""+ prediccion + """ </h3> <p> 
                     </body>
                 </html> """

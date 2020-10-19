@@ -1,11 +1,11 @@
 # Módulo con funciones para el procesamiento de imágenes
 
+
 # Manejo de imágenes
 import imageio
 import cv2
+from tensorflow.keras.preprocessing.image import ImageDataGenerator ,img_to_array
 
-import numpy as np 
-import matplotlib.pyplot as plt
 
 def leer_imagen (ubicacion,nombre):
     if ubicacion:
@@ -17,9 +17,8 @@ def leer_imagen (ubicacion,nombre):
 
 def guardar_imagen (imagen, ubicacion,nombre):
     ruta = ubicacion + "/" + nombre
-    im = imageio.imwrite(ruta,imagen)
+    imageio.imwrite(ruta,imagen)
     return
-
 
 def preparar_imagen (imagen, dimension):
     """
@@ -44,22 +43,29 @@ def formatear_imagen (imagen, dimension):
     imagen_nr =img_normaliz.reshape(1,dimension, dimension, 1)     #Reshape para la predicción 
     return imagen_nr
 
-def prediccion_imagen (modelo, imagen, cnames, imagen_orig=None):
+
+def generar_imagenes (imagen, cantidad, ubicacion, prefijo, formato):
     """
-        Recibe el modelo, la imagen a predecir, los nombres de las clases y la imagen a mostrar
-        Muestra la imagen
-        Calcula la predicción según el modelo y la muestra (incluyendo la probabilidad)
+    Crea la cantidad de imágenes indicada (cantidad) usando Keras ImageDataGenerator.
+    Las imágenes son guardadas en el directorio "ubicacion" con el prefijo y la extensión (formato)
+    indicados coo argumento.
+    Ejemplo: 
+    generar_imagenes (imag,3,ubic,"im_", "png") Crea en el directorio ubic, 3 variaciones de imagen con
+    prefijo im_*.png
     """
-    y_pred = modelo.predict(imagen)
-    if imagen_orig:
-        plt.figure(figsize=(3,3))
-        plt.xticks([])
-        plt.yticks([])
-        plt.grid(False)
-        plt.imshow(imagen_orig) #,  cmap=plt.cm.binary)
-        plt.show()
-    res_pred = cnames[np.where(max(y_pred[0])==y_pred[0])[0][0]] 
-    result =  res_pred.upper() + " (" + str(round(max(y_pred[0])*100,2))+ "%)"
-    if y_pred[0][0] > y_pred[0][1]:  # Lesión Sospechosa
-        result += " Recomendamos acudir a un especialista para su revisión."
-    return result
+    augmenter = ImageDataGenerator(horizontal_flip=True,
+        rotation_range=30, 
+        width_shift_range=0.1,
+        height_shift_range=0.1,
+        zoom_range=0.2,
+        shear_range=0.1,
+        fill_mode='nearest')
+
+    x = img_to_array(imagen)  # la imagen original convertida a Numpy array
+    x = x.reshape((1,) + x.shape)  # Numpy array con shape (1, 293,360,4)
+    i = 0
+    for batch in augmenter.flow(x, batch_size=1, save_to_dir=ubicacion, save_prefix=prefijo, save_format=formato):
+        i += 1
+        if i > cantidad:
+            break  # Detiene el generador luego de 10 imágenes para que no  itere indefinidamente
+    return
