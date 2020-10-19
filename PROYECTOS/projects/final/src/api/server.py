@@ -19,7 +19,6 @@ import apis_tb as atb
 # ----------------------
 # $$$$$$$ FLASK $$$$$$$$
 # ----------------------
-
 app = Flask(__name__)  # init
 
 @app.route("/")  # Default path
@@ -27,12 +26,13 @@ def default():
     return """
     <html>
         <body style="background-color: #accba1;" >
-            <h1> Revisión de lesiones cutáneas  (GET) </h1> 
+            <h1> Revisión de lesiones cutáneas  (GET) </h1>     
+            <img src= 'f1.png' alt="IMAGEN" width="200" height="200">          
             <p> Modelo para evaluación de lunares o lesiones cutáneas sospechosas <h3> Use     /get/access?tok=</p></h3>
              <h6> Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678) </h6>
         </body>
     </html> """
-    #return mensaje
+
 
 # ----------------------
 # $$$$$$$ FLASK GET $$$$$$$$
@@ -101,10 +101,8 @@ def pred():
 @app.route('/predict', methods=["POST"])
 def get_pred():
     request_file = request.files['data_file']
-
     if not request_file:
         return "No hay archivo seleccionado"
-
     if ".png"  in str(request_file) :
         foto=ftb.preparar_imagen(request_file,48)
         foto_r= ftb.formatear_imagen(foto,48)
@@ -116,8 +114,8 @@ def get_pred():
         respuesta= """
                 <html>
                     <body style="background-color: #9cab97;" > 
-                        <h4>Imagen de caracter </h4>
-                        <p> <h3>"""+ prediccion + """ </h3> <p> 
+                        <h4> Imagen de caracter </h4>
+                         <p> <h3>"""+ prediccion  + """ </h3> <p> 
                     </body>
                 </html> """
         return respuesta
@@ -127,7 +125,6 @@ def get_pred():
 @app.route('/pred_json', methods=["POST"])
 def get_pred_json():
     request_file = request.files['data_file']
-
     if not request_file:
         return "No hay archivo seleccionado"
     if ".png"  in str(request_file) :
@@ -138,6 +135,7 @@ def get_pred_json():
         model_name = "Model_0.82609_16-18-16"
         modelo = mtb.cargar_modelo (ubicacion, model_name)
         prediccion = atb.pred_json(modelo,foto_r,class_names)
+        #<img src="""+ im_path + """ alt="IMAGEN" width="500" height="600">
         respuesta= """
                 <html>
                     <body style="background-color: #9cab97;" > 

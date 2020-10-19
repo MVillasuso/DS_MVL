@@ -1,5 +1,5 @@
 # Módulo con funciones para el procesamiento de imágenes
-
+import pandas as pd
 
 # Manejo de imágenes
 import imageio
@@ -69,3 +69,9 @@ def generar_imagenes (imagen, cantidad, ubicacion, prefijo, formato):
         if i > cantidad:
             break  # Detiene el generador luego de 10 imágenes para que no  itere indefinidamente
     return
+
+def cargar_csv(fname):
+    df=pd.read_csv(fname)
+    df.set_index("Unnamed: 0", inplace=True)
+    df.index.name = None
+    return df
