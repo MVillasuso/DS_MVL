@@ -1,11 +1,12 @@
 # Módulo con funciones para el procesamiento de imágenes
-import pandas as pd
-
+import os
+import pandas as pd 
+import matplotlib.pyplot as plt
 # Manejo de imágenes
-import imageio
 import cv2
-from tensorflow.keras.preprocessing.image import ImageDataGenerator ,img_to_array
+import imageio
 
+from tensorflow.keras.preprocessing.image import ImageDataGenerator ,img_to_array
 
 def leer_imagen (ubicacion,nombre):
     if ubicacion:
@@ -18,17 +19,18 @@ def leer_imagen (ubicacion,nombre):
 def guardar_imagen (imagen, ubicacion,nombre):
     ruta = ubicacion + "/" + nombre
     imageio.imwrite(ruta,imagen)
-    return
+    return 
 
 def preparar_imagen (imagen, dimension):
     """
         Recibe un archivo en formato .png 
-        Convierte el archivo de entrada en formato Blanco y Negro y Reduce su tamaño a las dimensiones            (pixels) especificadas (cuadrada)
+        Convierte el archivo de entrada en formato Blanco y Negro y Reduce su tamaño a las dimensiones 
+        (pixels) especificadas (cuadrada)
         Retorna la foto modificada
     """
     imagen_orig=imageio.imread(imagen)
     img_byn = imagen_orig[:, :, 0]       # Foto en Blanco y Negro
-    img_red=cv2.resize(img_byn,(dimension,dimension))   # Foto reducida a 48x48
+    img_red= cv2.resize(img_byn,(dimension,dimension))   # Foto reducida a 48x48
     return img_red
 
 def formatear_imagen (imagen, dimension):
@@ -42,7 +44,6 @@ def formatear_imagen (imagen, dimension):
     img_normaliz /=255             #Foto normalizada
     imagen_nr =img_normaliz.reshape(1,dimension, dimension, 1)     #Reshape para la predicción 
     return imagen_nr
-
 
 def generar_imagenes (imagen, cantidad, ubicacion, prefijo, formato):
     """
@@ -71,7 +72,16 @@ def generar_imagenes (imagen, cantidad, ubicacion, prefijo, formato):
     return
 
 def cargar_csv(fname):
-    df=pd.read_csv(fname)
+    df = pd.read_csv(fname)
     df.set_index("Unnamed: 0", inplace=True)
     df.index.name = None
     return df
+
+def salvar_plot (dir_name, f_name):
+    """
+    Guarda el archivo como .PNG en el directorio indicado
+    """
+    results_dir = os.path.join(dir_name) 
+    if not os.path.isdir(results_dir): 
+        os.makedirs(results_dir) 
+    plt.savefig(results_dir + f_name,bbox_inches='tight') 

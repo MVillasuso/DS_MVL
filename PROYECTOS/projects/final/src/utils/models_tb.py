@@ -10,9 +10,9 @@ def guardar_modelo (modelo, ruta, test_acc):
     Guarda el modelo y los pesos por separado. EL primer valor del nombre del archivo del modelo 
     (test_acc)es el % de accuracy que alcanzó con el conjunto de test
     """
-    os.chdir(ruta)
+    #os.chdir(ruta)
     moment=time.localtime()
-    name='Model_{}_{}-{}-{}'.format(round(test_acc,5),moment[2],moment[3],moment[4])
+    name=ruta + "/"+'Model_{}_{}-{}-{}'.format(round(test_acc,5),moment[2],moment[3],moment[4])
     modelo.save(name)
     model_json = modelo.to_json()
     with open(name+'.json', "w") as json_file:
@@ -25,9 +25,9 @@ def cargar_modelo (ruta, nombre):
     Carga un modelo guardado previamente en la ruta indicada y lo retorna
     El modelo debe estar almacenado con extensión .json y los pesos con extensión .h5
     """
-    os.chdir(ruta)
-    model_name=nombre + ".json"
-    model_weigths = nombre + ".h5"
+    #os.chdir(ruta)
+    model_name=ruta + "/"+ nombre + ".json"
+    model_weigths = ruta + "/"+ nombre + ".h5"
     
     with open(model_name,'r') as f:
         model_json = json.load(f)

@@ -1,5 +1,5 @@
 import os, sys
-sys.path.append('/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/final/src/utils') 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../utils") )
 import io
 import json
 import pandas as pd
@@ -20,14 +20,16 @@ import apis_tb as atb
 # $$$$$$$ FLASK $$$$$$$$
 # ----------------------
 app = Flask(__name__)  # init
+MODEL_NAME=""
 
 @app.route("/")  # Default path
 def default():
+    ubic_img=  os.path.join(os.path.dirname(__file__), "../../resources/Casos/f1.png")
     return """
     <html>
         <body style="background-color: #accba1;" >
             <h1> Revisión de lesiones cutáneas  (GET) </h1>     
-            <img src= 'f1.png' alt="IMAGEN" width="200" height="200">          
+            <img src= '"""+ ubic_img + """' alt="IMAGEN" width="200" height="200">          
             <p> Modelo para evaluación de lunares o lesiones cutáneas sospechosas <h3> Use     /get/access?tok=</p></h3>
              <h6> Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678) </h6>
         </body>
@@ -40,7 +42,6 @@ def default():
 
 @app.route('/get/access', methods=['GET'])
 def acceso():
-
     token_id = None
     if 'tok' in request.args:
         token_id = str(request.args['tok'])
@@ -49,7 +50,7 @@ def acceso():
                 <html>
                     <body style="background-color: #accba1;" >
                         <h2> Nota: Necesitará la foto de su lesión en formato PNG </h2>
-                        <h3> Para ver la predicción     use  -->    get/pred?mod=lunares <h3>  
+                        <h3> Para ver la predicción     use  -->    get/pred?mod=vista <h3>  
                         <h3> Para obtener archivo json  use -->    get/pred?mod=json <h3>    
                     </body> 
                 </html>"""
@@ -62,12 +63,12 @@ def pred():
     valid = None
     if 'mod' in request.args:
         valid = str(request.args['mod'])
-    if valid == 'lunares':           #Si el token es válido
+    if valid == 'vista':           #Si el token es válido
         return """
                 <html>
                     <body style="background-color: #accba1;" >
                         <h2>Evaluación de lesiones cutáneas</h2>
-                        <p> Sube una foto de la lesión en formato <b>PNG</b> o <b>JPG</b> y te diremos si debes revisarla con un especialista. </p>
+                        <p> Sube una foto de la lesión en formato <b>PNG</b> y te diremos si debes revisarla con un especialista. </p>
                         <p> <i> El resultado es orientativo. No pretende reemplazar el diagnóstico o la opinión de un profesional </i> </p>
                         <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
                         </p>
@@ -83,7 +84,7 @@ def pred():
                 <html>
                     <body style="background-color: #accba1;" >
                         <h2>[JSON] Evaluación de lesiones cutáneas</h2>
-                        <p> Sube una foto de la lesión en formato <b>PNG</b> o <b>JPG</b>. </p>
+                        <p> Sube una foto de la lesión en formato <b>PNG</b>. </p>
                         <p> <i> Devuelve un string en formato JSON con la probabilidad del modelo para cada clase </i> </p>
                         <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
                         </p>
@@ -104,13 +105,11 @@ def get_pred():
     if not request_file:
         return "No hay archivo seleccionado"
     if ".png"  in str(request_file) :
-        foto=ftb.preparar_imagen(request_file,48)
-        foto_r= ftb.formatear_imagen(foto,48)
         class_names = ['Sospechoso','Benigno']
-        ubicacion = "/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/final/modelos"
-        model_name = "Model_0.82609_16-18-16"
+        ubicacion=  os.path.join(os.path.dirname(__file__), "../../modelos")
+        model_name= MODEL_NAME
         modelo = mtb.cargar_modelo (ubicacion, model_name)
-        prediccion = atb.prediccion_imagen(modelo, foto_r, class_names, imagen_orig=None)
+        prediccion = atb.predic_imagen(modelo, request_file, class_names, modif=True, mostrar=False, rjson=False)
         respuesta= """
                 <html>
                     <body style="background-color: #9cab97;" > 
@@ -120,7 +119,7 @@ def get_pred():
                 </html> """
         return respuesta
     else :
-        return "Seleccione un formato de archivo válido (.png o .jpg)"
+        return "La imagen debe estar en formato .png"
 
 @app.route('/pred_json', methods=["POST"])
 def get_pred_json():
@@ -128,13 +127,11 @@ def get_pred_json():
     if not request_file:
         return "No hay archivo seleccionado"
     if ".png"  in str(request_file) :
-        foto=ftb.preparar_imagen(request_file,48)
-        foto_r= ftb.formatear_imagen(foto,48)
         class_names = ['Sospechoso','Benigno']
-        ubicacion = "/Users/purbina/Desktop/THE_BRIDGE/DS_MVL/PROYECTOS/projects/final/modelos"
-        model_name = "Model_0.82609_16-18-16"
+        ubicacion=  os.path.join(os.path.dirname(__file__), "../../modelos")
+        model_name= MODEL_NAME
         modelo = mtb.cargar_modelo (ubicacion, model_name)
-        prediccion = atb.pred_json(modelo,foto_r,class_names)
+        prediccion = atb.predic_imagen(modelo, request_file, class_names, modif=True, mostrar=False, rjson=True)
         #<img src="""+ im_path + """ alt="IMAGEN" width="500" height="600">
         respuesta= """
                 <html>
@@ -144,7 +141,7 @@ def get_pred_json():
                 </html> """
         return respuesta
     else :
-        return "Seleccione un formato de archivo válido (.png o .jpg)"
+        return "Seleccione un formato de archivo válido (.png)"
 
 # ----------------------
 # $$$$$$$ MAIN $$$$$$$$
@@ -154,7 +151,9 @@ def main():
 
     print("STARTING PROCESS")
     print(os.path.dirname(__file__))
-    
+
+    global MODEL_NAME
+
     # Get the settings fullpath
     settings_file = os.path.dirname(__file__) + "/settings.json"
     # Load json from file 
@@ -168,6 +167,7 @@ def main():
         DEBUG = json_readed["debug"]
         HOST = json_readed["host"]
         PORT_NUM = json_readed["port"]
+        MODEL_NAME = json_readed["model_name"]
         app.run(debug=DEBUG, host=HOST, port=PORT_NUM)
     else:
         print("Server settings.json doesn't allow to start server. " + "Please, allow it to run it.")
