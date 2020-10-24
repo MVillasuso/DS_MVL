@@ -5,36 +5,31 @@ import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from flask import Flask, make_response, request
-from flask import render_template, redirect, request, jsonify , send_file
+from flask import Flask, make_response
+from flask import render_template, redirect, request, jsonify , send_file, url_for
 # Manejo de imágenes
 import imageio
 import cv2
 from PIL import Image
+from datetime import datetime
 # Módulos del proyecto
 import models_tb as mtb
 import folders_tb as ftb
 import apis_tb as atb
+import random
+import string
 
 # ----------------------
 # $$$$$$$ FLASK $$$$$$$$
 # ----------------------
 app = Flask(__name__)  # init
+uploads_dir = os.path.join(os.path.dirname(__file__), 'static/uploads')
 MODEL_NAME=""
 
 @app.route("/")  # Default path
 def default():
-    ubic_img=  os.path.join(os.path.dirname(__file__), "../../resources/Casos/f1.png")
-    return """
-    <html>
-        <body style="background-color: #accba1;" >
-            <h1> Revisión de lesiones cutáneas  (GET) </h1>     
-            <img src= '"""+ ubic_img + """' alt="IMAGEN" width="200" height="200">          
-            <p> Modelo para evaluación de lunares o lesiones cutáneas sospechosas <h3> Use     /get/access?tok=</p></h3>
-             <h6> Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678) </h6>
-        </body>
-    </html> """
-
+    message = "Token: LETRA y dígitos del DNI (sin espacios) (Ej.: M12345678)" 
+    return render_template('index.html', message=message)
 
 # ----------------------
 # $$$$$$$ FLASK GET $$$$$$$$
@@ -46,15 +41,7 @@ def acceso():
     if 'tok' in request.args:
         token_id = str(request.args['tok'])
     if token_id == 'E55114370':           #Si el token es válido
-        resp = """
-                <html>
-                    <body style="background-color: #accba1;" >
-                        <h2> Nota: Necesitará la foto de su lesión en formato PNG </h2>
-                        <h3> Para ver la predicción     use  -->    get/pred?mod=vista <h3>  
-                        <h3> Para obtener archivo json  use -->    get/pred?mod=json <h3>    
-                    </body> 
-                </html>"""
-        return resp
+        return render_template('access.html')
     else:
         return "Error: Token inválido" + "<br>" + "<br>" + str(request.args)
 
@@ -64,44 +51,19 @@ def pred():
     if 'mod' in request.args:
         valid = str(request.args['mod'])
     if valid == 'vista':           #Si el token es válido
-        return """
-                <html>
-                    <body style="background-color: #accba1;" >
-                        <h2>Evaluación de lesiones cutáneas</h2>
-                        <p> Sube una foto de la lesión en formato <b>PNG</b> y te diremos si debes revisarla con un especialista. </p>
-                        <p> <i> El resultado es orientativo. No pretende reemplazar el diagnóstico o la opinión de un profesional </i> </p>
-                        <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
-                        </p>
-                        <form action="/predict" method="post" enctype="multipart/form-data">
-                            <input type="file" name="data_file" />
-                            <input type="submit" />
-                        </form>
-                    </body>
-                </html>
-            """
+        return render_template('vista.html')
     elif valid == "json":
-        return """
-                <html>
-                    <body style="background-color: #accba1;" >
-                        <h2>[JSON] Evaluación de lesiones cutáneas</h2>
-                        <p> Sube una foto de la lesión en formato <b>PNG</b>. </p>
-                        <p> <i> Devuelve un string en formato JSON con la probabilidad del modelo para cada clase </i> </p>
-                        <p> <h5> <b> NOTA: </b> No se modificará ni almacenará ninguna información en tu ordenador. </h5> </p>
-                        </p>
-                        <form action="/pred_json" method="post" enctype="multipart/form-data">
-                            <input type="file" name="data_file" />
-                            <input type="submit" />
-                        </form>
-                    </body>
-                </html>
-            """
+        return render_template('json.html')
     else:
         return "Error: Token inválido" + "<br>" + "<br>" + str(request.args)
-
 
 @app.route('/predict', methods=["POST"])
 def get_pred():
     request_file = request.files['data_file']
+    rand_name = "img_".join(random.choice(string.ascii_letters) for i in range(2)) + ".png"
+    img_path = os.path.join("/uploads", rand_name)
+    img_name = os.path.join(uploads_dir, rand_name)
+    request_file.save(img_name)
     if not request_file:
         return "No hay archivo seleccionado"
     if ".png"  in str(request_file) :
@@ -109,15 +71,8 @@ def get_pred():
         ubicacion=  os.path.join(os.path.dirname(__file__), "../../modelos")
         model_name= MODEL_NAME
         modelo = mtb.cargar_modelo (ubicacion, model_name)
-        prediccion = atb.predic_imagen(modelo, request_file, class_names, modif=True, mostrar=False, rjson=False)
-        respuesta= """
-                <html>
-                    <body style="background-color: #9cab97;" > 
-                        <h4> Imagen de caracter </h4>
-                         <p> <h3>"""+ prediccion  + """ </h3> <p> 
-                    </body>
-                </html> """
-        return respuesta
+        prediccion = atb.predic_imagen(modelo, img_name, class_names, modif=True, mostrar=False, rjson=False)
+        return render_template("pred_vista.html", prediccion=prediccion, rfoto=img_path)
     else :
         return "La imagen debe estar en formato .png"
 
@@ -132,14 +87,7 @@ def get_pred_json():
         model_name= MODEL_NAME
         modelo = mtb.cargar_modelo (ubicacion, model_name)
         prediccion = atb.predic_imagen(modelo, request_file, class_names, modif=True, mostrar=False, rjson=True)
-        #<img src="""+ im_path + """ alt="IMAGEN" width="500" height="600">
-        respuesta= """
-                <html>
-                    <body style="background-color: #9cab97;" > 
-                        <p> <h3>"""+ prediccion + """ </h3> <p> 
-                    </body>
-                </html> """
-        return respuesta
+        return render_template( "pred_json.html", prediccion=prediccion)
     else :
         return "Seleccione un formato de archivo válido (.png)"
 

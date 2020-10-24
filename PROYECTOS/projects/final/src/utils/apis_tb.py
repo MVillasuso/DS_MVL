@@ -27,7 +27,7 @@ def predic_imagen (modelo, pimagen, cnames, modif= False, mostrar=False, rjson=F
         res_pred = cnames[np.where(max(y_pred[0])==y_pred[0])[0][0]] 
         result =  res_pred.upper() + " (" + str(round(max(y_pred[0])*100,2))+ "%)"
         if y_pred[0][0] > y_pred[0][1]:  # Lesión Sospechosa
-            result += " Recomendamos acudir a un especialista para su revisión."
+            result += " - Acuda a un especialista para su revisión."
         if mostrar:     
             img =imageio.imread(pimagen)
             plt.figure(figsize=(3,3))
